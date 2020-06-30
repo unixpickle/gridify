@@ -38,7 +38,7 @@ func PlaceInGrid(tiles []image.Image, cols int) image.Image {
 		for y := 0; y < bounds.Dy(); y++ {
 			for x := 0; x < bounds.Dx(); x++ {
 				src := img.At(x+bounds.Min.X, y+bounds.Min.Y)
-				result.Set(x, y, src)
+				result.Set(outX+x, outY+y, src)
 			}
 		}
 	}
