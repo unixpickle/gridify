@@ -7,18 +7,36 @@ import (
 	"github.com/unixpickle/essentials"
 )
 
+// AutoGridColumns automatically determines a good number
+// of columns for laying out tiles in a grid.
+func AutoGridColumns(tiles []image.Image) int {
+	tileWidth, tileHeight := tileBounds(tiles)
+
+	var bestCols int
+	var bestCircumference int
+	for cols := 1; cols <= len(tiles); cols++ {
+		rows := len(tiles) / cols
+		if len(tiles)%cols != 0 {
+			rows++
+		}
+		circum := tileWidth*cols + tileHeight*rows
+		// Use <= here to get as wide an image as possible.
+		if cols == 1 || circum <= bestCircumference {
+			bestCols = cols
+			bestCircumference = circum
+		}
+	}
+
+	return bestCols
+}
+
 // PlaceInGrid places all of the tile images into a grid
 // in a larger, single image.
 //
 // If the tiles are not all the same size, smaller tiles
 // are padded to be the size of the largest tile.
 func PlaceInGrid(tiles []image.Image, cols int) image.Image {
-	tileWidth, tileHeight := 0, 0
-	for _, img := range tiles {
-		bounds := img.Bounds()
-		tileWidth = essentials.MaxInt(tileWidth, bounds.Dx())
-		tileHeight = essentials.MaxInt(tileHeight, bounds.Dy())
-	}
+	tileWidth, tileHeight := tileBounds(tiles)
 
 	rows := len(tiles) / cols
 	if len(tiles)%cols != 0 {
@@ -44,6 +62,15 @@ func PlaceInGrid(tiles []image.Image, cols int) image.Image {
 	}
 
 	return result
+}
+
+func tileBounds(tiles []image.Image) (width, height int) {
+	for _, img := range tiles {
+		bounds := img.Bounds()
+		width = essentials.MaxInt(width, bounds.Dx())
+		height = essentials.MaxInt(height, bounds.Dy())
+	}
+	return
 }
 
 // ExtractFromGrid extracts tiles from a grid image.
