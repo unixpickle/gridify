@@ -11,7 +11,9 @@ import (
 
 func main() {
 	var cols int
+	var border int
 	flag.IntVar(&cols, "cols", 0, "number of columns (0 to layout automatically)")
+	flag.IntVar(&border, "border", 0, "extra border (in pixels) to put around tiles")
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: gridify [flags] <inputs ...> <output>")
 		fmt.Fprintln(os.Stderr)
@@ -41,6 +43,6 @@ func main() {
 		cols = AutoGridColumns(tiles)
 	}
 
-	output := PlaceInGrid(tiles, cols)
+	output := PlaceInGrid(tiles, cols, border)
 	essentials.Must(WriteImageToFile(flag.Args()[len(flag.Args())-1], output))
 }

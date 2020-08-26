@@ -35,8 +35,13 @@ func AutoGridColumns(tiles []image.Image) int {
 //
 // If the tiles are not all the same size, smaller tiles
 // are padded to be the size of the largest tile.
-func PlaceInGrid(tiles []image.Image, cols int) image.Image {
+//
+// The border argument specifies the number of extra
+// pixels to put around the largest tile.
+func PlaceInGrid(tiles []image.Image, cols, border int) image.Image {
 	tileWidth, tileHeight := tileBounds(tiles)
+	tileWidth += border
+	tileHeight += border
 
 	rows := len(tiles) / cols
 	if len(tiles)%cols != 0 {
