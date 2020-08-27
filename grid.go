@@ -79,7 +79,7 @@ func tileBounds(tiles []image.Image) (width, height int) {
 }
 
 // ExtractFromGrid extracts tiles from a grid image.
-func ExtractFromGrid(grid image.Image, rows, cols int) ([]image.Image, error) {
+func ExtractFromGrid(grid image.Image, rows, cols int, deborder bool) ([]image.Image, error) {
 	if grid.Bounds().Dx()%cols != 0 {
 		return nil, fmt.Errorf("number of columns (%d) does not divide width (%d)",
 			cols, grid.Bounds().Dx())
@@ -94,10 +94,14 @@ func ExtractFromGrid(grid image.Image, rows, cols int) ([]image.Image, error) {
 	var results []image.Image
 	for y := 0; y < rows; y++ {
 		for x := 0; x < cols; x++ {
-			results = append(results, &subimage{
+			si := &subimage{
 				Image:     grid,
 				newBounds: image.Rect(x*tileWidth, y*tileHeight, (x+1)*tileWidth, (y+1)*tileHeight),
-			})
+			}
+			if deborder {
+				si.RemoveBorder()
+			}
+			results = append(results, si)
 		}
 	}
 
@@ -111,4 +115,39 @@ type subimage struct {
 
 func (s *subimage) Bounds() image.Rectangle {
 	return s.newBounds
+}
+
+func (s *subimage) RemoveBorder() {
+	minX := s.newBounds.Max.X
+	minY := s.newBounds.Max.Y
+	maxX := s.newBounds.Min.X
+	maxY := s.newBounds.Min.Y
+	for y := s.newBounds.Min.Y; y < s.newBounds.Max.Y; y++ {
+		for x := s.newBounds.Min.X; x < s.newBounds.Max.X; x++ {
+			_, _, _, a := s.Image.At(x, y).RGBA()
+			if a > 0 {
+				if x < minX {
+					minX = x
+				}
+				if x > maxX {
+					maxX = x
+				}
+				if y < minY {
+					minY = y
+				}
+				if y > maxY {
+					maxY = y
+				}
+			}
+		}
+	}
+
+	// Handle fully-empty images.
+	maxX = essentials.MaxInt(maxX, minX)
+	maxY = essentials.MaxInt(maxY, minY)
+
+	s.newBounds.Min.X = minX
+	s.newBounds.Min.Y = minY
+	s.newBounds.Max.X = maxX
+	s.newBounds.Max.Y = maxY
 }

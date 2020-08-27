@@ -23,7 +23,7 @@ import (
 //
 // and the images from the grid will be returned in order
 // (according to scanline ordering).
-func ReadImagesFromFile(name string) (imgs []image.Image, err error) {
+func ReadImagesFromFile(name string, deborder bool) (imgs []image.Image, err error) {
 	defer essentials.AddCtxTo(fmt.Sprintf("read images %s", name), &err)
 
 	name, rows, cols, err := parseGridFilename(name)
@@ -40,7 +40,7 @@ func ReadImagesFromFile(name string) (imgs []image.Image, err error) {
 	if err != nil {
 		return nil, err
 	}
-	return ExtractFromGrid(img, rows, cols)
+	return ExtractFromGrid(img, rows, cols, deborder)
 }
 
 func parseGridFilename(name string) (base string, rows, cols int, err error) {

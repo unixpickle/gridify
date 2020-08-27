@@ -12,8 +12,10 @@ import (
 func main() {
 	var cols int
 	var border int
+	var deborder bool
 	flag.IntVar(&cols, "cols", 0, "number of columns (0 to layout automatically)")
 	flag.IntVar(&border, "border", 0, "extra border (in pixels) to put around tiles")
+	flag.BoolVar(&deborder, "deborder", false, "remove transparent borders around input images")
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: gridify [flags] <inputs ...> <output>")
 		fmt.Fprintln(os.Stderr)
@@ -35,7 +37,7 @@ func main() {
 
 	var tiles []image.Image
 	for _, imageName := range flag.Args()[:len(flag.Args())-1] {
-		images, err := ReadImagesFromFile(imageName)
+		images, err := ReadImagesFromFile(imageName, deborder)
 		essentials.Must(err)
 		tiles = append(tiles, images...)
 	}
